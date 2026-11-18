@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>לשרוד את בצלאל</title>
+<style>
+@font-face{font-family:'Rubik Pixels';src:url(rubik-pixels-he.woff2) format('woff2');font-display:swap}
+@font-face{font-family:'Rubik';font-weight:700;src:url(rubik-700-he.woff2) format('woff2');font-display:swap}
+:root{
+  --gold:#ffd23a; --orange:#ff8a1f; --red:#e8283c; --blue:#4f9bff; --navy:#0b1233; --navy2:#101a4a;
+  --pixfont:'Rubik Pixels','Rubik','Arial Hebrew',Arial,sans-serif;
+  --font:'Rubik','Arial Hebrew',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#03040c;overflow:hidden;font-family:var(--font);color:#fff}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+body::after{ /* scanlines */
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:50;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.16) 2px 3px);
+}
+#stage{z-index:1;position:absolute;left:0;top:0;width:1200px;height:1186px;transform-origin:0 0;direction:ltr}
+img{image-rendering:pixelated;display:block}
+
+/* title */
+#title{position:absolute;left:250px;top:0;width:700px}
+#title img{width:700px;height:auto}
+
+/* head row */
+#row{position:absolute;left:130px;top:232px;width:940px;height:310px;display:flex;gap:14px;justify-content:center;align-items:flex-end}
+.card{all:unset;cursor:pointer;width:176px;display:flex;flex-direction:column;align-items:center;gap:4px;
+  filter:brightness(.55) saturate(.8);transition:transform .12s steps(3),filter .12s steps(3);position:relative}
+.card img.name{width:176px;height:auto}
+.card img.head{width:176px;height:auto}
+.card.sel{filter:none;transform:translateY(-14px) scale(1.07);z-index:2}
+.card.sel::after{content:"";position:absolute;left:-5px;right:-5px;bottom:-5px;top:56px;border:4px solid var(--gold);
+  box-shadow:0 0 18px rgba(255,210,58,.7);animation:blink .7s steps(1) infinite;pointer-events:none}
+.card.sel .tag{display:block}
+.tag{display:none;position:absolute;bottom:-34px;font:700 20px var(--pixfont);color:#1a1000;background:var(--gold);padding:2px 12px;
+  box-shadow:3px 3px 0 #a15a00;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:.35}}
+.locked .card:not(.sel){filter:brightness(.3) saturate(.3)}
+.locked .card.sel::after{animation:none}
+
+/* arena */
+#arena{position:absolute;left:35px;top:574px;width:1130px;height:430px;display:flex;gap:16px;justify-content:space-between}
+.panel{width:330px;height:430px;position:relative;overflow:hidden;
+  background:
+    radial-gradient(2px 2px at 20% 14%,#fff,transparent),radial-gradient(2px 2px at 76% 30%,#ffd9a0,transparent),
+    radial-gradient(2px 2px at 40% 60%,#9fd0ff,transparent),radial-gradient(2px 2px at 88% 78%,#fff,transparent),
+    radial-gradient(2px 2px at 10% 82%,#fff,transparent),
+    linear-gradient(#0a0f2e,#14104a);
+  border:4px solid var(--blue);box-shadow:inset 0 0 0 4px #0a1340,0 0 0 4px #060a1f,0 0 24px rgba(79,155,255,.25)}
+.panel .floor{position:absolute;left:0;right:0;bottom:0;height:46px;background:repeating-linear-gradient(90deg,#17205a 0 24px,#0f1744 24px 48px);border-top:3px solid #2c3f98}
+.panel .who{position:absolute;top:8px;left:0;right:0;text-align:center;font:400 26px var(--pixfont);color:var(--gold);text-shadow:3px 3px 0 #7a1a00;direction:rtl}
+.sprite{position:absolute;bottom:34px;left:50%;transform-origin:50% 100%;image-rendering:pixelated}
+#studentSprite{animation:bob 1.1s steps(1) infinite}
+#dannySprite{animation:bob 1.3s steps(1) infinite}
+.talking #dannySprite{animation:bob .35s steps(1) infinite}
+@keyframes bob{0%{margin-bottom:0}50%{margin-bottom:5px}}
+.pop{animation:pop .28s steps(5) both,bob 1.1s steps(1) .28s infinite !important}
+@keyframes pop{from{opacity:0;transform:translateX(calc(-50% - 40px))}to{opacity:1;transform:translateX(-50%)}}
+.sprite{transform:translateX(-50%)}
+#dannySprite{transform:translateX(-50%) scaleX(-1)}
+#shadowS,#shadowD{position:absolute;bottom:30px;left:50%;width:130px;height:16px;margin-left:-65px;background:rgba(0,0,0,.45);border-radius:50%}
+
+/* stats */
+#stats{width:420px;height:430px;direction:rtl;position:relative}
+#heads{display:flex;justify-content:space-between;direction:ltr;margin-bottom:10px}
+#heads .hbox{position:relative}
+#heads img{width:100px;height:auto}
+#heads .vs{align-self:center;position:relative;width:132px;height:90px;display:grid;place-items:center}
+#heads .vs img{width:114px;height:auto;animation:vsPulse 1.2s steps(1) infinite;filter:drop-shadow(0 0 10px rgba(255,120,30,.75))}
+#heads .vs i{position:absolute;width:12px;height:12px;background:
+  linear-gradient(#fff,#fff) center/4px 100% no-repeat,linear-gradient(#fff,#fff) center/100% 4px no-repeat;animation:blink .9s steps(1) infinite}
+#heads .vs i:nth-child(2){left:2px;top:6px}
+#heads .vs i:nth-child(3){right:0;top:20px;animation-delay:.3s;transform:scale(.7)}
+#heads .vs i:nth-child(4){left:14px;bottom:2px;animation-delay:.6s;transform:scale(.8)}
+#heads .vs i:nth-child(5){right:10px;bottom:6px;animation-delay:.15s}
+@keyframes vsPulse{0%{transform:scale(1)}50%{transform:scale(1.1) rotate(-2deg)}}
+.locked #heads .vs img{animation:vsHit .5s steps(2) 2}
+@keyframes vsHit{50%{transform:scale(1.35);filter:brightness(1.6) drop-shadow(0 0 16px #fff)}}
+.srow{display:grid;grid-template-columns:1fr 112px 1fr;align-items:center;height:38px;border-bottom:2px solid #1b2a6b;direction:ltr}
+.srow .lbl{font:700 19px var(--font);text-align:center;color:#cfe3ff;direction:rtl;text-shadow:2px 2px 0 #000}
+.stars{display:flex;gap:2px;font-size:21px;line-height:1;letter-spacing:0}
+.stars.s{justify-content:flex-start}.stars.d{justify-content:flex-end}
+.star{color:#3a3f66;text-shadow:1px 1px 0 #000}
+.star.on{color:var(--orange);text-shadow:1px 1px 0 #7a1a00,0 0 6px rgba(255,138,31,.5);animation:starin .2s steps(2) both}
+@keyframes starin{from{transform:scale(0)}to{transform:scale(1)}}
+.brow{display:grid;grid-template-columns:1fr 70px 1fr;align-items:center;margin-top:8px;direction:ltr;min-height:58px}
+.brow .lbl{font:400 22px var(--pixfont);color:var(--gold);text-align:center;text-shadow:2px 2px 0 #7a1a00;direction:rtl}
+.brow .txt{font:700 17px/1.25 var(--font);color:var(--gold);direction:rtl;text-shadow:2px 2px 0 #000}
+.brow .txt.s{text-align:left}.brow .txt.d{text-align:right}
+
+/* footer */
+#footer{position:absolute;left:35px;right:35px;top:1021px;height:60px;direction:rtl}
+#startBtn{all:unset;cursor:pointer;position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:300px;height:56px;text-align:center;
+  font:400 30px/56px var(--pixfont);color:#1a1000;background:linear-gradient(var(--gold),var(--orange));
+  border:3px solid #fff3b0;box-shadow:0 5px 0 #8a3a00,0 0 20px rgba(255,170,30,.5);animation:pulse 1s steps(2) infinite}
+#startBtn:active{transform:translate(-50%,4px);box-shadow:0 1px 0 #8a3a00}
+.locked #startBtn{animation:none;background:linear-gradient(#9fb6ff,#4f6bd6);border-color:#dfe8ff;box-shadow:0 5px 0 #1b2a80;color:#07123a}
+@keyframes pulse{50%{filter:brightness(1.18)}}
+#hint{position:absolute;right:0;top:12px;font:700 14px var(--font);color:#6f7db8;direction:rtl}
+
+/* dialog */
+#dialog{position:absolute;left:50%;top:1078px;width:760px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;
+  display:flex;gap:14px;align-items:center;padding:14px 18px;direction:rtl;z-index:20;
+  background:linear-gradient(#18309a,#0c1a5c);border:4px solid #fff;box-shadow:0 0 0 4px #060a1f,0 10px 0 4px rgba(0,0,0,.5),0 0 40px rgba(79,155,255,.5)}
+#dialog.show{opacity:1;transform:translateX(-50%);transition:transform .25s steps(4),opacity .25s steps(4)}
+#dialog img{width:62px;height:auto;border:3px solid #b28cff;flex:none}
+#dialog .nm{font:400 20px var(--pixfont);color:var(--gold);text-shadow:2px 2px 0 #7a1a00}
+#dialog .tx{font:700 30px/1.3 var(--font);color:#fff;text-shadow:3px 3px 0 #000;min-height:40px}
+#dialog .tx::after{content:"▮";color:var(--gold);animation:blink .6s steps(1) infinite;margin-right:4px}
+.done #dialog .tx::after{content:""}
+
+/* music toggle */
+#mute{all:unset;cursor:pointer;position:absolute;left:24px;top:24px;width:60px;height:60px;display:grid;place-items:center;z-index:30;
+  background:linear-gradient(#18309a,#0c1a5c);border:4px solid var(--blue);box-shadow:inset 0 0 0 3px #0a1340,0 0 0 3px #060a1f,0 4px 0 3px #060a1f}
+#mute:hover{filter:brightness(1.25)}
+#mute:active{transform:translateY(3px)}
+#mute svg{width:34px;height:34px;shape-rendering:crispEdges}
+#mute .on{display:block}#mute .off{display:none}
+#mute.muted .on{display:none}#mute.muted .off{display:block}
+#mute.waiting{animation:blink 1s steps(1) infinite}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+<div id="stage">
+  <button id="mute" type="button" aria-label="השתקת מוזיקה" title="מוזיקה (M)">
+    <svg class="on" viewBox="0 0 16 16"><path fill="#ffd23a" d="M2 6h3l4-3v10l-4-3H2z"/><path fill="#ffd23a" d="M11 5h1v1h-1zM12 6h1v4h-1zM11 10h1v1h-1zM13 3h1v1h-1zM14 4h1v8h-1zM13 12h1v1h-1z"/></svg>
+    <svg class="off" viewBox="0 0 16 16"><path fill="#7d86b8" d="M1 6h3l4-3v10l-4-3H1z"/><path fill="#ff3b4e" d="M10 5h1v1h-1zM11 6h1v1h-1zM12 7h1v1h-1zM13 8h1v1h-1zM14 9h1v1h-1zM14 5h1v1h-1zM13 6h1v1h-1zM12 7h1v1h-1zM11 8h1v1h-1zM10 9h1v1h-1z"/></svg>
+  </button>
+  <div id="title"><img src="title.png" alt="לשרוד את בצלאל — בחרו את הסטודנט שלכם"></div>
+
+  <div id="row" role="listbox" aria-label="בחירת סטודנט"></div>
+
+  <div id="arena">
+    <div class="panel" id="panelS">
+      <div class="who" id="whoS"></div>
+      <div class="floor"></div><div id="shadowS"></div>
+      <img class="sprite" id="studentSprite" alt="">
+    </div>
+
+    <div id="stats">
+      <div id="heads">
+        <div class="hbox"><img id="headS" alt=""></div>
+        <div class="vs"><img src="vs.png" alt="VS"><i></i><i></i><i></i><i></i></div>
+        <div class="hbox"><img id="headD" src="head_danny.png" alt="דני ביקון"></div>
+      </div>
+      <div id="rows"></div>
+      <div class="brow">
+        <div class="txt s" id="bonusS"></div>
+        <div class="lbl">בונוס</div>
+        <div class="txt d" id="bonusD">הוא דני ביקון</div>
+      </div>
+    </div>
+
+    <div class="panel" id="panelD">
+      <div class="who">דני ביקון</div>
+      <div class="floor"></div><div id="shadowD"></div>
+      <img class="sprite" id="dannySprite" src="fig_danny.png" alt="דני ביקון">
+    </div>
+  </div>
+
+  <div id="dialog" aria-live="polite">
+    <img src="avatar_danny.png" alt="">
+    <div><div class="nm">דני ביקון</div><div class="tx" id="quote"></div></div>
+  </div>
+
+  <div id="footer">
+    <button id="startBtn" type="button">התחלת משחק</button>
+    <div id="hint">חיצים ← → לבחירה · Enter להתחלה</div>
+  </div>
+</div>
+
+<script>
+const STATS=['חנפנות','מרדנות','שמאלנות','ניהול זמנים','מצב כלכלי','אקטיביות'];
+const DANNY={stats:[1,3,3,2,5,5]};
+// סדר משמאל לימין על המסך: יעל, שגיא, גבי, קים, עידן
+const CHARS=[
+ {id:'yael',name:'יעל', stats:[2,2,5,5,4,3],bonus:'יש לה אוכל במקרר',quote:'אפשר ללמוד מזה', scale:1.6},
+ {id:'sagi',name:'שגיא',stats:[5,3,3,2,4,5],bonus:'בן של מרצה',quote:'זה מצחיק כי זה גס', scale:1.5},
+ {id:'gabi',name:'גבי', stats:[1,5,2,1,2,4],bonus:'יש לו לוקר',quote:'אין תגמול, תרקדו', scale:1.6},
+ {id:'kim', name:'קים', stats:[4,1,3,5,3,5],bonus:'יש לה מדפסת בבית',quote:'תשאיר את העבודה הזאת למורה', scale:1.5},
+ {id:'idan',name:'עידן',stats:[2,3,5,3,3,4],bonus:'גר קרוב לבצלאל',quote:'אתה תהיה שפנפן הניסיונות שלי', scale:1.5},
+];
+const STUDENT_H=330, DANNY_H=345;
+const $=s=>document.querySelector(s);
+const stage=$('#stage'), row=$('#row');
+let sel=0, locked=false, typer=null;
+
+// cards
+CHARS.forEach((c,i)=>{
+  const b=document.createElement('button'); b.className='card'; b.setAttribute('role','option'); b.dataset.i=i;
+  b.innerHTML=`<img class="name" src="name_${c.id}.png" alt="${c.name}"><img class="head" src="head_${c.id}.png" alt=""><span class="tag">בחירה</span>`;
+  b.addEventListener('click',()=>choose(i)); row.appendChild(b);
+});
+// stat rows
+const rowsEl=$('#rows');
+STATS.forEach((n,k)=>{
+  const r=document.createElement('div'); r.className='srow';
+  r.innerHTML=`<div class="stars s" id="ss${k}"></div><div class="lbl">${n}</div><div class="stars d" id="sd${k}"></div>`;
+  rowsEl.appendChild(r);
+});
+function stars(el,n,delay){
+  el.innerHTML='';
+  for(let i=0;i<5;i++){
+    const s=document.createElement('span'); s.className='star'+(i<n?' on':''); s.textContent='★';
+    if(i<n) s.style.animationDelay=(delay+i*40)+'ms';
+    el.appendChild(s);
+  }
+}
+// Danny stars never change, draw once
+DANNY.stats.forEach((n,k)=>stars($('#sd'+k),n,k*60));
+
+function render(){
+  const c=CHARS[sel];
+  document.querySelectorAll('.card').forEach((el,i)=>{el.classList.toggle('sel',i===sel);el.setAttribute('aria-selected',i===sel)});
+  const sp=$('#studentSprite');
+  sp.src=`fig_${c.id}.png`; sp.alt=c.name;
+  sp.style.height='auto'; sp.style.width='';
+  sp.onload=()=>{sp.style.width=(sp.naturalWidth*(STUDENT_H/sp.naturalHeight))+'px'};
+  sp.classList.remove('pop'); void sp.offsetWidth; sp.classList.add('pop');
+  $('#whoS').textContent=c.name;
+  $('#headS').src=`head_${c.id}.png`;
+  c.stats.forEach((n,k)=>stars($('#ss'+k),n,k*60));
+  $('#bonusS').textContent=c.bonus;
+}
+function choose(i){ if(locked)return; sel=i; render(); Music.blip([76]); }
+function move(d){ if(locked)return; sel=(sel+d+CHARS.length)%CHARS.length; render(); Music.blip([76]); }
+
+const dlg=$('#dialog'), q=$('#quote'), btn=$('#startBtn');
+function start(){
+  Music.blip([72,76,79,84]);
+  locked=true; stage.classList.add('locked','talking'); stage.classList.remove('done');
+  btn.textContent='בחירה מחדש';
+  const text='"'+CHARS[sel].quote+'"'; q.textContent=''; dlg.classList.add('show');
+  let n=0; clearInterval(typer);
+  typer=setInterval(()=>{ q.textContent=text.slice(0,++n);
+    if(n>=text.length){clearInterval(typer);stage.classList.remove('talking');stage.classList.add('done')} },45);
+}
+function reset(){
+  locked=false; clearInterval(typer); stage.classList.remove('locked','talking','done');
+  dlg.classList.remove('show'); btn.textContent='התחלת משחק';
+}
+btn.addEventListener('click',()=>locked?reset():start());
+addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft'){e.preventDefault();move(-1)}
+  else if(e.key==='ArrowRight'){e.preventDefault();move(1)}
+  else if(e.key==='Enter'){if(e.target===btn)return; e.preventDefault();locked?reset():start()}
+  else if(e.key==='Escape'&&locked){reset()}
+  else if(e.key==='m'||e.key==='M'||e.key==='צ'){Music.toggle()}
+});
+// touch swipe
+let tx=null; addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{ if(tx===null)return; const dx=e.changedTouches[0].clientX-tx; if(Math.abs(dx)>50)move(dx>0?-1:1); tx=null; },{passive:true});
+
+// dialog position follows the arena bottom; Danny sprite width
+const ds=$('#dannySprite'); ds.onload=()=>{ds.style.width=(ds.naturalWidth*(DANNY_H/ds.naturalHeight))+'px'}; if(ds.complete)ds.onload();
+
+
+// ---------- music (original chiptune loop, synthesised with Web Audio) ----------
+const Music=(()=>{
+  let ctx,master,noiseBuf,timer,nextT=0,step=0,started=false,muted=localStorage.getItem('sb-muted')==='1';
+  const BPM=132, EIGHTH=60/BPM/2;
+  const mtof=m=>440*Math.pow(2,(m-69)/12);
+  const LEAD=[[69,0,72,69,76,0,74,72],[65,0,69,72,77,0,76,72],[67,0,72,67,76,0,74,72],[67,0,71,74,79,0,77,74],
+              [69,0,72,69,76,0,81,76],[77,0,76,72,69,0,72,76],[74,0,71,67,71,0,74,77],[76,0,75,76,80,0,83,0]];
+  const ROOT=[45,41,48,43,45,41,43,40];
+  function tone(type,f,t,dur,vol,dest){
+    const o=ctx.createOscillator(),g=ctx.createGain(); o.type=type; o.frequency.value=f;
+    g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol,t+0.008); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(dest||master); o.start(t); o.stop(t+dur+0.02);
+  }
+  function noise(t,dur,vol,hp){
+    const n=ctx.createBufferSource(); n.buffer=noiseBuf; const f=ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=hp;
+    const g=ctx.createGain(); g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    n.connect(f); f.connect(g); g.connect(master); n.start(t); n.stop(t+dur+0.02);
+  }
+  function kick(t){const o=ctx.createOscillator(),g=ctx.createGain(); o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(40,t+0.12);
+    g.gain.setValueAtTime(0.9,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.16); o.connect(g); g.connect(master); o.start(t); o.stop(t+0.18)}
+  function play(i,t){
+    const bar=Math.floor(i/8)%8, e=i%8, lead=LEAD[bar][e], r=ROOT[bar];
+    if(lead){ tone('square',mtof(lead),t,EIGHTH*0.85,0.16); tone('square',mtof(lead)*1.004,t,EIGHTH*0.85,0.06); }
+    tone('triangle',mtof(r+((e===2||e===6)?12:0)),t,EIGHTH*0.9,0.5);
+    if(e===0||e===4) kick(t);
+    if(e===2||e===6) noise(t,0.12,0.35,1200);
+    noise(t,0.03,0.08,6000);
+  }
+  function tick(){
+    while(nextT<ctx.currentTime+0.35){ play(step,nextT); nextT+=EIGHTH; step=(step+1)%64; }
+  }
+  function ensure(){
+    if(ctx) return;
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    master=ctx.createGain(); master.gain.value=muted?0:0.2; master.connect(ctx.destination);
+    noiseBuf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate); const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  }
+  function start(){
+    if(started) return; ensure(); if(ctx.state==='suspended')ctx.resume();
+    started=true; nextT=ctx.currentTime+0.1; timer=setInterval(tick,60); btn_.classList.remove('waiting');
+  }
+  function setMuted(m){
+    muted=m; localStorage.setItem('sb-muted',m?'1':'0'); btn_.classList.toggle('muted',m);
+    if(!muted && !started) start();
+    if(master) master.gain.setTargetAtTime(m?0:0.2,ctx.currentTime,0.03);
+  }
+  function blip(freqs){ if(muted)return; ensure(); if(ctx.state==='suspended')ctx.resume(); let t=ctx.currentTime;
+    freqs.forEach((m,i)=>tone('square',mtof(m),t+i*0.06,0.09,0.18)); }
+  const btn_=document.getElementById('mute');
+  btn_.classList.toggle('muted',muted);
+  if(!muted) btn_.classList.add('waiting');
+  btn_.addEventListener('click',e=>{ e.stopPropagation(); if(!started&&!muted){start();return} setMuted(!muted); });
+  // browsers only allow audio after a user gesture: start on the first one
+  const first=e=>{ if((e.target&&e.target.closest&&e.target.closest('#mute'))||e.key==='m'||e.key==='M')return; if(!muted) start(); removeEventListener('pointerdown',first); removeEventListener('keydown',first); };
+  addEventListener('pointerdown',first); addEventListener('keydown',first);
+  return {toggle:()=>setMuted(!muted),blip,isMuted:()=>muted,state:()=>({started,muted,ctx:ctx&&ctx.state,gain:master&&master.gain.value,t:ctx&&ctx.currentTime,step})};
+})();
+
+
+// ---------- twinkling starfield over the whole page ----------
+(()=>{
+  const cv=document.getElementById('sky'), g=cv.getContext('2d'); let W,H,stars=[];
+  const COLS=['#ffffff','#ffffff','#cfe3ff','#ffe9a8','#ffb27a','#9fd0ff'];
+  function init(){
+    const dpr=Math.min(devicePixelRatio||1,2); W=innerWidth; H=innerHeight;
+    cv.width=W*dpr; cv.height=H*dpr; g.setTransform(dpr,0,0,dpr,0,0);
+    const n=Math.round(W*H/1300);
+    stars=Array.from({length:n},()=>({x:Math.random()*W|0,y:Math.random()*H|0,
+      s:Math.random()<.75?1:Math.random()<.8?2:3, c:COLS[Math.random()*COLS.length|0],
+      p:Math.random()*6.28, v:.6+Math.random()*2.2, big:Math.random()<.06}));
+  }
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function draw(t){
+    g.clearRect(0,0,W,H);
+    for(const a of stars){
+      const tw=reduce?1:(Math.sin(t/1000*a.v+a.p)>.35?1:Math.sin(t/1000*a.v+a.p)>-.4?.55:.2);
+      g.globalAlpha=tw; g.fillStyle=a.c; g.fillRect(a.x,a.y,a.s,a.s);
+      if(a.big&&tw>.9){ g.fillRect(a.x-2,a.y,a.s+4,a.s); g.fillRect(a.x,a.y-2,a.s,a.s+4); }
+    }
+    g.globalAlpha=1; if(!reduce) requestAnimationFrame(draw);
+  }
+  addEventListener('resize',()=>{init();draw(performance.now())}); init(); requestAnimationFrame(draw);
+})();
+
+// fit stage to window
+function fit(){
+  const s=Math.min(innerWidth/1200,innerHeight/1186);
+  stage.style.transform=`translate(${(innerWidth-1200*s)/2}px,${(innerHeight-1186*s)/2}px) scale(${s})`;
+}
+addEventListener('resize',fit); fit();
+render();
+</script>
+</body>
+</html>
